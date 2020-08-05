@@ -37,22 +37,25 @@ console.log('Will read file!');
 // SERVER
 //./ points to location from where node executes index.js
 //${__dirname} points to location where index.js exists
+
+const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8')
+const productData = JSON.parse(data);
+
 const server = http.createServer((req, res) => {
     const pathName = req.url;
     if (pathName === '/overview' || pathName === '/') {
         res.end('This is Overview');
+
     } else if (pathName === '/product') {
         res.end('This is Product');
-    } else if (pathName === '/api') {
-        fs.readFile(`${__dirname}/dev-data/data.json`, 'utf-8', (err, data) => {
-            const productData = JSON.parse(data);
-            res.writeHead(200, {
-                'Content-type': 'application/json'
-            })
-            res.end(JSON.stringify(productData));
-        });
 
-    }else {
+    } else if (pathName === '/api') {
+        res.writeHead(200, {
+            'Content-type': 'application/json'
+        })
+        res.end(JSON.stringify(productData));
+
+    } else {
         res.writeHead(404, {
             'Content-type':'text/html',
             'my-custom-header':'Hello World'
