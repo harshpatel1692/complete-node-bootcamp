@@ -1,5 +1,5 @@
 const fs = require('fs'); //File system module
-const http = require('http');
+const http = require('http'); //Spawn server
 
 ///////////////////////////////////////////////
 // FILE SYSTEM
