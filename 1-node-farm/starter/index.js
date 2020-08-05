@@ -1,6 +1,8 @@
-const fs = require('fs'); //File system module
-const http = require('http'); //Spawn server
-const url = require('url'); //For webpage routing
+const fs = require("fs"); //File system module
+const http = require("http"); //Spawn server
+const url = require("url"); //For webpage routing
+const slugify = require("slugify"); //Third party modules from package.json
+const replaceTemplate = require("./modules/replaceTemplate"); //Different import format compared to web based JS of custom package
 
 ///////////////////////////////////////////////
 // FILE SYSTEM
@@ -32,66 +34,48 @@ fs.readFile('./txt/start.txt', 'utf-8',(err, data1) => {
 console.log('Will read file!');
 */
 
-
 ///////////////////////////////////////////////
 // SERVER
 //./ points to location from where node executes index.js
 //${__dirname} points to location where index.js exists
-const replaceTemplate = (temp, product) => {
-    let output  = temp.replace(/{%PRODUCTNAME%}/g, product.productName);
-    output  = output.replace(/{%ID%}/g, product.id);
-    output  = output.replace(/{%IMAGE%}/g, product.image);
-    output  = output.replace(/{%QUANTITY%}/g, product.quantity);
-    output  = output.replace(/{%PRICE%}/g, product.price);
-    output  = output.replace(/{%FROM%}/g, product.from);
-    output  = output.replace(/{%NUTRIENTS%}/g, product.nutrients);
-    output  = output.replace(/{%DESCRIPTION%}/g, product.description);
 
-    if (!product.organic) output  = output.replace(/{%NOT_ORGANIC%}/g, 'not-organic'); //css class name
-    return output
-};
-const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8')
+const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8");
 const dataObj = JSON.parse(data);
+const slugs = dataObj.map((el) => slugify(el.productName, { lower: true })); //Create URL slugs from keywords
+console.log(`slugs: ${slugs}`);
 
-const tempOverview = fs.readFileSync(`${__dirname}/templates/overview.html`, 'utf-8')
-const tempProduct = fs.readFileSync(`${__dirname}/templates/product.html`, 'utf-8')
-const tempCard = fs.readFileSync(`${__dirname}/templates/template-card.html`, 'utf-8')
-
+const tempOverview = fs.readFileSync(`${__dirname}/templates/overview.html`,"utf-8");
+const tempProduct = fs.readFileSync(`${__dirname}/templates/product.html`,"utf-8");
+const tempCard = fs.readFileSync(`${__dirname}/templates/template-card.html`,"utf-8");
 
 const server = http.createServer((req, res) => {
-    // console.log(url.parse(req.url, true))
-    // const pathName = req.url;
-    const {query, pathname } = url.parse(req.url, true) //exact value on the left side will fetch the names from the right side
+  // console.log(url.parse(req.url, true))
+  // const pathName = req.url;
+    const { query, pathname } = url.parse(req.url, true); //exact value on the left side will fetch the names from the right side
 
     //Overview Page
-    if (pathname === '/overview' || pathname === '/') {
-        res.writeHead(200, {'Content-type':'text/html'});
-        const cardsHtml = dataObj.map(el => replaceTemplate(tempCard, el)).join(''); //join array to a single string
-        const output = tempOverview.replace(/{%PRODUCT_CARDS%}/g, cardsHtml);
-        res.end(output);
+    if (pathname === "/overview" || pathname === "/") {
+      res.writeHead(200, { "Content-type": "text/html" });
+      const cardsHtml = dataObj.map((el) => replaceTemplate(tempCard, el)).join(""); //join array to a single string
+      const output = tempOverview.replace(/{%PRODUCT_CARDS%}/g, cardsHtml);
+      res.end(output);
 
-    } else if (pathname === '/product') {
-        const product = dataObj[query.id];
-        const output = replaceTemplate(tempProduct, product);
-        res.writeHead(200, {'Content-type':'text/html'});
-        res.end(output);
+    } else if (pathname === "/product") {
+      const product = dataObj[query.id];
+      const output = replaceTemplate(tempProduct, product);
+      res.writeHead(200, { "Content-type": "text/html" });
+      res.end(output);
 
-    } else if (pathName === '/api') {
-        res.writeHead(200, {
-            'Content-type': 'application/json'
-        })
-        res.end(JSON.stringify(productData));
+    } else if (pathname === "/api") {
+      res.writeHead(200, { "Content-type": "application/json" });
+      res.end(JSON.stringify(dataObj));
 
     } else {
-        res.writeHead(404, {
-            'Content-type':'text/html',
-            'my-custom-header':'Hello World'
-        });
-        res.end('<h1>Page not found!</h1>');
+      res.writeHead(404, {"Content-type": "text/html", "my-custom-header": "Hello World"});
+      res.end("<h1>Page not found!</h1>");
     }
-
 });
 
-server.listen(8000, 'localhost', () => {
-    console.log('Listening to request on port 8000')
+server.listen(8000, "localhost", () => {
+  console.log("Listening to request on port 8000");
 });
