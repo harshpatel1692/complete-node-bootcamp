@@ -1,6 +1,10 @@
 const fs = require('fs'); //File system module
+const http = require('http');
 
+///////////////////////////////////////////////
+// FILE SYSTEM
 /*This code is Synchronous. Each line will block the next one.*/
+/*
 const textIn = fs.readFileSync('./txt/input.txt', 'utf-8')
 console.log(textIn)
 const textOut = `This is what we know about avacado: ${textIn}.\n Created on ${Date.now()}`;
@@ -25,3 +29,17 @@ fs.readFile('./txt/start.txt', 'utf-8',(err, data1) => {
     })
 })
 console.log('Will read file!');
+*/
+
+
+///////////////////////////////////////////////
+// SERVER
+
+const server = http.createServer((req, res) => {
+    console.log(req)
+    res.end('Hello from the server!');
+});
+
+server.listen(8000, 'localhost', () => {
+    console.log('Listening to request on port 8000')
+});
