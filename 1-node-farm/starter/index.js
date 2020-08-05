@@ -1,5 +1,6 @@
 const fs = require('fs'); //File system module
 const http = require('http'); //Spawn server
+const url = require('url'); //For webpage routing
 
 ///////////////////////////////////////////////
 // FILE SYSTEM
@@ -34,10 +35,31 @@ console.log('Will read file!');
 
 ///////////////////////////////////////////////
 // SERVER
-
+//./ points to location from where node executes index.js
+//${__dirname} points to location where index.js exists
 const server = http.createServer((req, res) => {
-    console.log(req)
-    res.end('Hello from the server!');
+    const pathName = req.url;
+    if (pathName === '/overview' || pathName === '/') {
+        res.end('This is Overview');
+    } else if (pathName === '/product') {
+        res.end('This is Product');
+    } else if (pathName === '/api') {
+        fs.readFile(`${__dirname}/dev-data/data.json`, 'utf-8', (err, data) => {
+            const productData = JSON.parse(data);
+            res.writeHead(200, {
+                'Content-type': 'application/json'
+            })
+            res.end(JSON.stringify(productData));
+        });
+
+    }else {
+        res.writeHead(404, {
+            'Content-type':'text/html',
+            'my-custom-header':'Hello World'
+        });
+        res.end('<h1>Page not found!</h1>');
+    }
+
 });
 
 server.listen(8000, 'localhost', () => {
