@@ -1,14 +1,32 @@
 const fs = require('fs');
 const express = require('express');
+const morgan = require('morgan');
 
 const app = express();
+//MIDDLEWARES
+
+app.use(morgan('dev'));
+
 app.use(express.json()); //express.json middleware for request
+
+//Defining custom middleware
+app.use((req, res, next) => {
+    console.log('Hello from the middleware');
+    next(); //Always use next in middleware;
+})
+
+app.use((req, res, next) => {
+    req.requestTime = new Date().toISOString();
+    next(); //Always use next in middleware;
+})
 
 const tours = JSON.parse(
     fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 )
 
 const getAllTours = (req, res) => {
+
+    // console.log(req.headers.cookie)
     res.status(200)
     res.json({
         status: 'success',
@@ -21,7 +39,7 @@ const getAllTours = (req, res) => {
 };
 
 const getTour = (req, res) => {
-    // console.log(req.params)
+
     const id = req.params.id * 1; //id from string to int
     const tour = tours.find(el => el.id  === id)
 
