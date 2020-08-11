@@ -4,6 +4,34 @@ const tours = JSON.parse(
     fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 )
 
+
+exports.checkID = (req, res, next, val) => {
+    const id = req.params.id * 1; //id from string to int
+    const tour = tours.find(el => el.id  === id)
+
+    if (!tour) {
+        return res.status(404).json({
+            status: 'fail',
+            message: 'Invalid ID'
+        })
+    }
+    next();
+}
+
+//create checkBody middleware
+//check if body contain the and price property
+//if not, send back 400 err
+// add it to the post handle stack
+exports.checkBody = (req, res, next) =>  {
+    if (!res.body.name || !res.body.price){
+        return res.status(400).json({
+           status: 'fail',
+           message: 'Missing name or price'
+        });
+    }
+    next();
+}
+
 exports.getAllTours = (req, res) => {
 
     // console.log(req.headers.cookie)
@@ -22,14 +50,6 @@ exports.getTour = (req, res) => {
 
     const id = req.params.id * 1; //id from string to int
     const tour = tours.find(el => el.id  === id)
-
-    if (!tour) {
-        res.status(404)
-        res.json({
-            status: 'fail',
-            message: 'Invalid ID'
-        })
-    }
 
     res.status(200)
     res.json({
@@ -59,16 +79,6 @@ exports.createTour = (req, res)=>{
 }
 exports.updateTour = (req, res) => {
 
-    const id = req.params.id * 1; //id from string to int
-    const tour = tours.find(el => el.id  === id)
-
-    if (!tour) {
-        res.status(404)
-        res.json({
-            status: 'fail',
-            message: 'Invalid ID'
-        })
-    }
     res.status(200)
     res.json({
         status: 'success',
@@ -80,16 +90,6 @@ exports.updateTour = (req, res) => {
 
 exports.deleteTour = (req, res) => {
 
-    const id = req.params.id * 1; //id from string to int
-    const tour = tours.find(el => el.id  === id)
-
-    if (!tour) {
-        res.status(404)
-        res.json({
-            status: 'fail',
-            message: 'Invalid ID'
-        })
-    }
     res.status(204)
     res.json({
         status: 'success',
