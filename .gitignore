@@ -2,4 +2,4 @@
 .idea/
 1-node-farm/starter/node_modules/
 1-node-farm/starter/txt/output.txt
-4-natours/starter/config.env
+!/4-natours/starter/config.env
