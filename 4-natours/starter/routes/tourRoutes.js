@@ -14,6 +14,9 @@ router
     .get(tourController.getAllTours)
     .post(tourController.createTour); //first checkBody was called, condition satisfied, NEXT from check body got triggered, moved to createTour
 
+router.route('/tour-stats').get(tourController.getTourStats);
+router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
+
 router
     .route('/:id')
     .get(tourController.getTour)
