@@ -15,7 +15,7 @@ app.use(express.static(`${__dirname}/public`)); //Serving static files directly 
 
 //Defining custom middleware
 app.use((req, res, next) => {
-    console.log('Hello from the middleware');
+    // console.log('Hello from the middleware');
     next(); //Always use next in middleware;
 })
 
