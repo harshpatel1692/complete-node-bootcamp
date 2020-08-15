@@ -52,7 +52,17 @@ const tourSchema = new mongoose.Schema({
         select: false
     },
     startDates: [Date]
-})
+}, {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+
+}); //Schema definition and Schema options
+
+// Used function() instead of => because using arrow doesn't get 'this' keyword
+// Cannot use virtual properties in query
+tourSchema.virtual('durationWeeks').get(function () {
+    return this.duration / 7;
+});
 
 const Tour = mongoose.model('Tour', tourSchema);
 
