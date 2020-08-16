@@ -1,6 +1,7 @@
 const fs = require('fs');
 const APIFeatures = require('./../utils/apiFeatures');
-const Tour = require('./../models/tourModel')
+const Tour = require('./../models/tourModel');
+const catchAsync = require('./../utils/catchAsync');
 /*
 const tours = JSON.parse(
     fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
@@ -99,8 +100,8 @@ exports.getAllTours = async (req, res) => {
     }
 };
 
-exports.getTour = async (req, res) => {
-    try {
+exports.getTour = catchAsync(async (req, res, next) => {
+    /*try {
         const tour = await Tour.findById(req.params.id)
         res.status(200).json({
             status: 'success',
@@ -116,13 +117,29 @@ exports.getTour = async (req, res) => {
             message: err
         })
 
-    }
-}
+    }*/
 
-exports.createTour = async (req, res)=>{
+    const tour = await Tour.findById(req.params.id);
+
+    if (!tour) {
+        const err = new AppError('No tour found with that ID', 404);
+        return next(err)
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            tour
+        }
+    });
+})
+
+//Wrapper on createTour method to get rid of try catch
+exports.createTour = catchAsync (async (req, res, next)=>{
 
     // const newTour = new Tour({})
     // newTour.save()
+    /*
     try {
         const newTour = await Tour.create(req.body);
 
@@ -139,7 +156,17 @@ exports.createTour = async (req, res)=>{
             message: err
         })
     }
-}
+    */
+    //Catching Async - refactoring to get rid of try-catch statement from above logic
+    const newTour = await Tour.create(req.body);
+
+    res.status(201).json({
+        status: 'success',
+        data: {
+            tour: newTour
+        }
+    })
+});
 exports.updateTour = async (req, res) => {
 
     try {
