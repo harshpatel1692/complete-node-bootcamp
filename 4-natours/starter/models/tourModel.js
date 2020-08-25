@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const validator = require('validator');
+const User = require('./userModel');
 
 const tourSchema = new mongoose.Schema({
     name: {
@@ -10,7 +11,7 @@ const tourSchema = new mongoose.Schema({
         unique: true,
         maxlength: [40, 'A tour name must have less or equal then 40 chars'],
         minlength: [10, 'A tour name must have greater or equal then 40 chars'],
-        validate: [validator.isAlpha, 'Tour name must only contain characters']
+        //validate: [validator.isAlpha, 'Tour name must only contain characters']
 
     },
     slug: String,
@@ -77,7 +78,36 @@ const tourSchema = new mongoose.Schema({
     secretTour: {
         type: Boolean,
         default: false
-    }
+    },
+    startLocation: {
+        type: {
+            type: String,
+            default: 'Point',
+            enum: ['Point']
+        },
+        coordinates: [Number],
+        address: String,
+        description: String
+    },
+    locations: [
+        {
+            type: {
+                type: String,
+                default: 'Point',
+                enum: ['Point']
+            },
+            coordinates: [Number],
+            address: String,
+            description: String,
+            day: Number
+        }
+    ],
+    guides: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: 'User'
+        }
+    ]
 },
     //Schema definition and Schema options
 {
@@ -92,6 +122,13 @@ tourSchema.pre('save', function(next) {
     this.slug = slugify(this.name, { lower: true });
     next();
 });
+
+//Guides Embedding - the other way is Referencing which is above
+/*tourSchema.pre('save', async function(next) {
+    const guidesPromises = this.guides.map(async id => await User.findById(id));
+    this.guides = await Promise.all(guidesPromises);
+    next();
+})*/
 /*
 //Middleware after save
 
@@ -109,23 +146,34 @@ tourSchema.pre(/^find/, function (next) {
     this.start = Date.now();
     next();
 });
-tourSchema.post(/^find/, function (docs, next) {
-    console.log('Query took: ', Date.now() - this.start, 'ms');
-    next();
-})
 
+
+tourSchema.pre(/^find/, function(next) {
+    this.populate({
+        path:'guides',
+        select: '-__v -passwordChangedAt'
+    })
+    next();
+});
 // AGGREGATION MIDDLEWARE - remove secret tour from aggregations
 tourSchema.pre('aggregate', function (next) {
     //Add in the beginning of pipeline array
     this.pipeline().unshift( { $match: { secretTour: { $ne: true } } } );
     next();
+});
+tourSchema.post(/^find/, function (docs, next) {
+    console.log('Query took: ', Date.now() - this.start, 'ms');
+    next();
 })
-
-
 // Used function() instead of => because using arrow doesn't get 'this' keyword
 // Cannot use virtual properties in query
 tourSchema.virtual('durationWeeks').get(function () {
     return this.duration / 7;
+});
+tourSchema.virtual('reviews', {
+    ref: 'Review',
+    foreignField: 'tour',
+    localField: '_id'
 });
 
 const Tour = mongoose.model('Tour', tourSchema);
