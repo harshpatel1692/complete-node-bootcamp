@@ -1,6 +1,7 @@
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
+const factory = require('./handlerFactory');
 
 const filterObj = (obj, ...allowedFields) => {
     const newObj = {};
@@ -26,6 +27,10 @@ exports.getAllUsers = catchAsync(async (req, res, next ) => {
     next();
 });
 
+exports.getMe = (req, res, next) => {
+    req.params.id = req.user.id;
+    next();
+}
 exports.updateMe = catchAsync(async (req, res, next) => {
     // 1. Create error if user POSTS password data
     // console.log(req);
@@ -53,28 +58,14 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
     })
 });
 
-exports.getUser = (req, res) => {
-    res.status(500).json({
-        status: 'error',
-        message: 'This route is not yet defined'
-    })
-}
 exports.createUser = (req, res) => {
-    res.status(500).json({
-        status: 'error',
-        message: 'This route is not yet defined'
-    })
-}
-exports.updateUser = (req, res) => {
-    res.status(500).json({
-        status: 'error',
-        message: 'This route is not yet defined'
-    })
-}
-exports.deleteUser = (req, res) => {
-    res.status(500).json({
-        status: 'error',
-        message: 'This route is not yet defined'
-    })
-}
 
+    res.status(500).json({
+        status: 'error',
+        message: 'Please use signup instead'
+    })
+}
+// Admin functions - with no auth middleware
+exports.getUser = factory.getOne(User);
+exports.updateUser = factory.updateOne(User);
+exports.deleteUser = factory.deleteOne(User);

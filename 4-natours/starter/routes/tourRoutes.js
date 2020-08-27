@@ -16,10 +16,10 @@ router.route('/top-5-cheap').get(tourController.aliasTopTours, tourController.ge
 router
     .route('/')
     .get(authController.protect, tourController.getAllTours)
-    .post(tourController.createTour); //first checkBody was called, condition satisfied, NEXT from check body got triggered, moved to createTour
+    .post(authController.protect, authController.restrictTo('admin', 'lead-guide'), tourController.createTour); //first checkBody was called, condition satisfied, NEXT from check body got triggered, moved to createTour
 
 router.route('/tour-stats').get(tourController.getTourStats);
-router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
+router.route('/monthly-plan/:year').get(authController.protect, authController.restrictTo('admin', 'lead-guide', 'guide'), tourController.getMonthlyPlan);
 
 router
     .route('/:id')
