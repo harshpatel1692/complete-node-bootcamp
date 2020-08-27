@@ -157,11 +157,12 @@ tourSchema.pre(/^find/, function(next) {
     next();
 });
 // AGGREGATION MIDDLEWARE - remove secret tour from aggregations
-tourSchema.pre('aggregate', function (next) {
+/*tourSchema.pre('aggregate', function (next) {
     //Add in the beginning of pipeline array
     this.pipeline().unshift( { $match: { secretTour: { $ne: true } } } );
     next();
-});
+});*/
+
 tourSchema.post(/^find/, function (docs, next) {
     console.log('Query took: ', Date.now() - this.start, 'ms');
     next();
@@ -173,16 +174,17 @@ tourSchema.post(/^find/, function (docs, next) {
 // tourSchema.index({ price: 1}); //1 is for descending and -1 for ascending
 tourSchema.index({ price: 1, ratingsAverage: -1}); //1 is for descending and -1 for ascending
 tourSchema.index({ slug: 1});
+tourSchema.index({startLocation: '2dsphere' });
 
 tourSchema.virtual('durationWeeks').get(function () {
     return this.duration / 7;
 });
+
 tourSchema.virtual('reviews', {
     ref: 'Review',
     foreignField: 'tour',
     localField: '_id'
 });
-
 const Tour = mongoose.model('Tour', tourSchema);
 
 module.exports = Tour;
